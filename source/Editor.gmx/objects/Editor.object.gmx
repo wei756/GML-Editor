@@ -25,10 +25,10 @@
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>x = 5;
+            <string>x = 0;
 y = 0;
-w = 300;
-h = 500;
+w = room_width;
+h = room_height;
 
 sx = 0;                 // window scroll x
 sy = 0;                 // window scroll y
@@ -41,7 +41,11 @@ text[2] = "test1;";
 col[0] = "a.....";      // editor text's color
 col[1] = "b..a..";
 col[2] = "bababa";
+col[3] = "bababa";
+col[4] = "bababa";
+col[5] = "bababa";
 
+coll = 0;               // text color
 // editor color preset
 color[0] = 12632256;    // Normal text
 color[1] = 7452927;     // Keywords
@@ -65,9 +69,16 @@ curx = 0;               // cursor's x
 cury = 0;               // cursor's y
 scurx = 0;              // shift cursor's x
 scury = 0;              // shift cursor's y
+keyentered = 0;         // check if text is modified
 
-
+menuh = 50;             // menu bar height
 linew = 30;             // line number width
+scrw = 16;              // scroll bar width
+errh = 20;              // error line height
+infh = 20;              // information bar height
+
+//syntax highlighter
+func_init();
 
 //ime init
 ime_init();
@@ -95,33 +106,14 @@ kor_init();
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>/*
-if keyboard_check_pressed(vk_left)
-{
-    if curx == 0
-    {
-        curx = string_length(text[max(cury - 1, 0)]) * (cury &gt; 0);
-        cury = max(cury - 1, 0);
-    }
-    else
-        curx--;
-}
-if keyboard_check_pressed(vk_right)
-{
-    if curx == string_length(text[cury])
-    {
-        curx = string_length(text[min(cury + 1, text_l - 1)]) * (cury == text_l - 1);
-        cury = min(cury + 1, text_l - 1);
-    }
-    else
-        curx++;
-}
-*/
-kor_string = text[cury];
+            <string>kor_string = text[cury];
 kor_input();
 kor_gen();
 curx = kor_cursor;
 text[cury] = kor_string;
+
+if keyentered
+    textcolor_gen();
 </string>
           </argument>
         </arguments>
@@ -144,13 +136,22 @@ text[cury] = kor_string;
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>draw_set_font(fontNanumGothic);
+            <string>draw_set_font(fontNanumGothicCoding);
 
 draw_set_color(color[9]);
 draw_rectangle(x, y, x + w - 1, y + h - 1, 0); // draw bg
 var lineh = string_height("Text123가나다라");
-draw_rectangle_colour(x - sx + linew, y - sy + lineh * cury, x + w - 1, y - sy + lineh * (cury + 1), color[10], color[10], color[10], color[10], 0); // draw line bg
-draw_rectangle_colour(x, y, x + linew - 1, y + h - 1, color[13], color[13], color[13], color[13], 0); // draw line number bg
+
+var xxx = x - sx, yyy = y - sy + menuh; // scroll section position
+
+// draw line bg
+draw_set_color(color[10]);
+draw_rectangle(xxx + linew, yyy + lineh * cury, x + w - 1, yyy + lineh * (cury + 1), 0); 
+// draw line number bg
+draw_set_color(color[13]);
+draw_rectangle(x, y + menuh, x + linew - 1, y + h - 1, 0); 
+draw_set_color(color[12]);
+draw_rectangle(x, y + menuh, x + linew - 1, y + h - 1, 1); 
 
 //text;
 draw_set_halign(fa_left);
@@ -159,31 +160,93 @@ draw_set_color(color[0]);
 var tx = 0, ty = 0, coll = 0;
 for(var yy = 0; yy &lt; text_l; yy++)
 {
+    var xx = -1;
+    if xx + 1 = curx &amp;&amp; yy = cury &amp;&amp; string_length(kor_buffer) // buffer
+    {
+        var _te = text_eng_to_hangul(kor_buffer);
+        
+        draw_set_color(color[10] * ((current_time - time) div 500 % 2));
+        draw_rectangle(xxx + linew + tx, yyy + ty, xxx + linew + tx + string_width(_te), yyy + ty + string_height(_te), 0);
+        
+        draw_set_color(color[coll * ((current_time - time) div 500 % 2)]);
+        draw_text(xxx + linew + tx, yyy + ty, _te);
+        tx += string_width(_te);
+    }
     for(var xx = 0; xx &lt; string_length(text[yy]); xx++)
     {
-        coll = ord(string_char_at(col[yy], xx + 1)) - 97;
-        if !(coll &lt; 0)
-            draw_set_color(color[coll]);
-        draw_text(x - sx + linew + tx, y - sy + ty, string_char_at(text[yy], xx + 1));
+        if !(ord(string_char_at(col[yy], xx + 1)) - 97 &lt; 0) { coll = ord(string_char_at(col[yy], xx + 1)) - 97; } // set color
+        draw_set_color(color[coll]);
         
-        tx += string_width(string_char_at(text[yy], xx + 1));
+        // normal text
+        if (string_char_at(text[yy], xx + 1) == "#")
+        {
+            draw_text(xxx + linew + tx, yyy + ty, "\#"); // #
+            tx += string_width("\#");
+        }
+        else
+        {
+            draw_text(xxx + linew + tx, yyy + ty, string_char_at(text[yy], xx + 1));
+            tx += string_width(string_char_at(text[yy], xx + 1));
+        }
+        
+        if xx + 1 = curx &amp;&amp; yy = cury &amp;&amp; string_length(kor_buffer)  // buffer
+        {
+            var _te = text_eng_to_hangul(kor_buffer);
+            
+            draw_set_color(color[10] * ((current_time - time) div 500 % 2));
+            draw_rectangle(xxx + linew + tx, yyy + ty, xxx + linew + tx + string_width(_te), yyy + ty + string_height(_te), 0);
+            
+            draw_set_color(color[coll * ((current_time - time) div 500 % 2)]);
+            draw_text(xxx + linew + tx, yyy + ty, _te);
+            tx += string_width(_te);
+        }
+        
     }
     
     var xx = string_length(text[yy]);
     {
-        coll = ord(string_char_at(col[yy], xx + 1)) - 97;
+        //coll = ord(string_char_at(col[yy], xx + 1)) - 97;
     }
     
     // line number
     draw_set_halign(fa_right);
-    draw_text_color(x - sx + linew - 3, y - sy + ty, yy + 1, color[12], color[12], color[12], color[12], 1);
+    draw_text_color(xxx + linew - 3, yyy + ty, yy + 1, color[12 + 3 * (cury == yy)], color[12 + 3 * (cury == yy)], color[12 + 3 * (cury == yy)], color[12 + 3 * (cury == yy)], 1);
     draw_set_halign(fa_left);
     tx = 0;
     ty += lineh;
 }
 //cursor
-draw_line_colour(x - sx + linew + string_width(string_copy(text[cury], 1, curx)), y - sy + lineh * cury, 
-                    x - sx + linew + string_width(string_copy(text[cury], 1, curx)), y - sy + lineh * (cury + 1), color[0], color[0]);
+if !string_length(kor_buffer) &amp;&amp; !((current_time - time) div 500 % 2)
+{
+    var xx = xxx + linew + string_width(string_replace_all(string_copy(text[cury], 1, curx), "#", "\#"));
+    draw_set_color(color[0]);
+    draw_line_width(xx - 1, yyy + lineh * cury, xx - 1, yyy + lineh * (cury + 1), 2);
+}
+//scroll bar
+
+//information bar
+draw_set_font(fontNanumGothicCoding);
+draw_set_halign(fa_left);
+draw_set_valign(fa_middle);
+// draw error bar
+draw_set_color(color[13]);
+draw_rectangle(x, y + h - infh - errh, x + w - 1, y + h - infh - 1, 0); // bar bg
+draw_set_color(color[0]);
+draw_rectangle(x, y + h - infh - errh, x + w - 1, y + h - infh - 1, 1); // bar line bg
+draw_text(x + 8, y + h - infh - errh / 2, "ERROR at line"); // error text
+// draw information bar
+draw_set_color(color[9]);
+draw_rectangle(x, y + h - infh, x + w - 1, y + h - 1, 0); // bar bg
+draw_set_color(color[0]);
+draw_rectangle(x, y + h - infh, x + w - 1, y + h - 1, 1); // bar line bg
+draw_text(x, y + h - infh / 2, string(cury + 1) + "/" + string(text_l) + ":  " + string(curx + 1)); // cursor
+draw_set_halign(fa_right);
+draw_text(x + w - 5, y + h - infh / 2, "FPS:  " + string(fps_real)); // fps
+
+
+/*
+draw_text(x + 5, 100, "f : " + string_copy("abcd", 0, 1));
+/*
 draw_text(x + 5, 100, "curx : " + string(curx));
 draw_text(x + 5, 120, "cury : " + string(cury));
 draw_text(x + 5, 140, "kor_string : " + string(kor_string));
@@ -191,6 +254,7 @@ for(var i = 0; i &lt; 17; i++)
 {
     draw_line_colour(10, 100 + i * 20, 100, 100 + i * 20, color[i], color[i]);
 }
+*/
 </string>
           </argument>
         </arguments>

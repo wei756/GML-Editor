@@ -75,7 +75,7 @@ kor_gen();
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>draw_set_font(font0);
+            <string>//draw_set_font(font0);
 draw_set_color(c_black);
 draw_text(x, y - 25, "kor text : " + kor_text);
 draw_text(x, y, "kor_string : " + kor_string);

@@ -1,4 +1,4 @@
-//kor_insert(text)
+///kor_insert(text)
 var te = argument0;
 
 if (string_length(kor_string) == 0)

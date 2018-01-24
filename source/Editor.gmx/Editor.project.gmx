@@ -24,9 +24,11 @@
       <script>scripts\ime_hangul_2.gml</script>
       <script>scripts\ime_english_qwerty.gml</script>
     </scripts>
+    <script>scripts\textcolor_gen.gml</script>
+    <script>scripts\func_init.gml</script>
   </scripts>
   <fonts name="fonts">
-    <font>fonts\fontNanumGothic</font>
+    <font>fonts\fontNanumGothicCoding</font>
     <font>fonts\fontBitstream</font>
   </fonts>
   <objects name="objects">
