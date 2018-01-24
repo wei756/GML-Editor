@@ -26,6 +26,7 @@
     </scripts>
     <script>scripts\textcolor_gen.gml</script>
     <script>scripts\func_init.gml</script>
+    <script>scripts\range.gml</script>
   </scripts>
   <fonts name="fonts">
     <font>fonts\fontNanumGothicCoding</font>
@@ -36,7 +37,7 @@
     <object>objects\object0</object>
   </objects>
   <rooms name="rooms">
-    <room>rooms\room0</room>
+    <room>rooms\main</room>
   </rooms>
   <help>
     <rtf>help.rtf</rtf>

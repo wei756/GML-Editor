@@ -9,7 +9,7 @@ for(var yy = 0; yy < text_l; yy++)
     {
         var te = string_char_at(text[yy], xx + 1);
         //comment /* */
-        if (comment == 2 && string_copy(text[yy], xx + 1, 2) == "*/")
+        if (comment == 2 && string_copy(text[yy], xx + 1, 2) == "*/") && quote == 0
         {
             comment = 0;
             col[yy] += "dd";
@@ -19,14 +19,14 @@ for(var yy = 0; yy < text_l; yy++)
         {
             col[yy] += ".";
         }
-        else if (string_copy(text[yy], xx + 1, 2) == "/*")
+        else if (string_copy(text[yy], xx + 1, 2) == "/*") && quote == 0
         {
             comment = 2;
             col[yy] += "dd";
             xx++;
         }
         //comment //
-        else if (string_copy(text[yy], xx + 1, 2) == "//")
+        else if (string_copy(text[yy], xx + 1, 2) == "//") && quote == 0
         {
             comment = 1;
             col[yy] += "dd";
@@ -66,7 +66,7 @@ for(var yy = 0; yy < text_l; yy++)
                     }
                 }
                 func = string_copy(text[yy], xx + 1, ind - xx + (i != -1));
-                if func != ""
+                if func != "" && (xx == 0 || string_char_at(text[yy], xx) == " " || ds_list_find_index(highlight[0], string_char_at(text[yy], xx)) != -1 || ds_list_find_index(highlight[1], string_char_at(text[yy], xx)) != -1)
                 {
                     var ind = -1;
                     for(var i = 6; i > 1; i--)

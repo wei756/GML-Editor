@@ -30,20 +30,19 @@ y = 0;
 w = room_width;
 h = room_height;
 
-sx = 0;                 // window scroll x
-sy = 0;                 // window scroll y
-
 //text
-text_l = 3;             // editor text line count
-text[0] = "test1;";     // editor text
-text[1] = "test1;";
-text[2] = "test1;";
-col[0] = "a.....";      // editor text's color
-col[1] = "b..a..";
-col[2] = "bababa";
-col[3] = "bababa";
-col[4] = "bababa";
-col[5] = "bababa";
+text_l = 9;             // editor text line count
+text[0] = "//made by 마크쨔응";     // editor text
+text[1] = "";
+text[2] = "if gmgm_project()";
+text[3] = "{";
+text[4] = "    for(var num = 3; num &lt;= 5; num++)";
+text[5] = "    {";
+text[6] = '        show_message("GMGM Project \#" + string(num));';
+text[7] = "    }";
+text[8] = "}";
+col[0] = "a..b..";      // editor text's color
+
 
 coll = 0;               // text color
 // editor color preset
@@ -72,17 +71,35 @@ scury = 0;              // shift cursor's y
 keyentered = 0;         // check if text is modified
 
 menuh = 50;             // menu bar height
-linew = 30;             // line number width
-scrw = 16;              // scroll bar width
+linew = 40;             // line number width
 errh = 20;              // error line height
 infh = 20;              // information bar height
 
+sx = 0;                 // window scroll x
+sy = 0;                 // window scroll y
+a_sx = 0;               // [anim]window scroll x
+a_sy = 0;               // [anim]window scroll y
+scrw = 16;              // scroll bar width
+mx = mouse_x;           // mouse pressed x position
+my = mouse_y;           // mouse pressed y position
+sClicked = 0;           // scroll bar click status
+maxsx = 0;
+for(var i = 0; i &lt; text_l; i++)
+if string_width(text[maxsx]) &lt; string_width(text[i])
+    maxsx = i;
+maxsx = max(string_width(text[maxsx]) - (w - scrw - linew), 0);   // maximun scroll x
+maxsy = max(0, (text_l * string_height("1234abcABC가나다라") - (h - menuh - errh - infh - scrw)));  // maximun scroll y
 //syntax highlighter
 func_init();
+textcolor_gen();
 
 //ime init
 ime_init();
 kor_init();
+
+
+window_set_min_width(320);
+window_set_min_height(menuh + scrw * 4 + errh + infh + 100);
 
 </string>
           </argument>
@@ -114,6 +131,143 @@ text[cury] = kor_string;
 
 if keyentered
     textcolor_gen();
+sx = clamp(sx, 0, maxsx);
+sy = clamp(sy, 0, maxsy);
+</string>
+          </argument>
+        </arguments>
+      </action>
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>///Window Resize
+if (room_width != window_get_width() or room_height != window_get_height()) and 
+    (window_get_width() &gt; 5 and window_get_height() &gt; 5) {
+    room_width = window_get_width();
+    room_height = window_get_height();
+    
+    surface_resize(application_surface, room_width, room_height);
+}
+
+x = 0;              // workspace x
+y = 0;              // workspace y
+w = room_width;     // workspace width
+h = room_height;    // workspace height
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="6" enumb="56">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>///스크롤바 클릭 해제
+sClicked = 0;
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="6" enumb="53">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>///스크롤바 클릭
+sClicked = 0;
+
+//bar_l = 스크롤바가 움직일 수 있는 범위 * 화면에 표시되는 너비 / 최대 범위
+bar_x = (w - scrw * 2) * (w - scrw - linew) / (maxsx + w - scrw - linew); // scroll bar length
+bar_y = (h - menuh - errh - infh - scrw * 3) * (h - menuh - errh - infh - scrw) / (maxsy + h - menuh - errh - infh - scrw * 3);
+if range(mouse_x, mouse_y, x + scrw + (w - scrw * 2 - bar_x) * a_sx / maxsx, 
+                            y + h - errh - infh - scrw, 
+                            x + scrw + (w - scrw * 2 - bar_x) * a_sx / maxsx + bar_x - 1, 
+                            y + h - errh - infh - 1)
+{
+    sClicked = 1; // 가로 스크롤바
+    mx = mouse_x - (x + scrw + (w - scrw * 2 - bar_x) * a_sx / maxsx);
+}
+
+if range(mouse_x, mouse_y, x + w - scrw, 
+                            y + menuh + scrw + (h - menuh - errh - infh - scrw * 3 - bar_y) * a_sy / maxsy, 
+                            x + w - 1, 
+                            y + menuh + scrw + (h - menuh - errh - infh - scrw * 3 - bar_y) * a_sy / maxsy + bar_y - 1)
+{
+    sClicked = 2; // 세로 스크롤바
+    my = mouse_y - (y + menuh + scrw + (h - menuh - errh - infh - scrw - scrw * 2 - bar_y) * a_sy / maxsy);
+}
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="6" enumb="50">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>///스크롤바 이동
+if sClicked == 1
+{
+    sx = ((window_mouse_get_x() - mx) - (x + scrw)) * maxsx / (w - scrw * 2 - bar_x);
+    sx = clamp(sx, 0, maxsx);
+}
+if sClicked == 2
+{
+    sy = ((window_mouse_get_y() - my) - (y + menuh + scrw)) * maxsy / (h - menuh - errh - infh - scrw * 3 - bar_y);
+    sy = clamp(sy, 0, maxsy);
+}
 </string>
           </argument>
         </arguments>
@@ -147,11 +301,6 @@ var xxx = x - sx, yyy = y - sy + menuh; // scroll section position
 // draw line bg
 draw_set_color(color[10]);
 draw_rectangle(xxx + linew, yyy + lineh * cury, x + w - 1, yyy + lineh * (cury + 1), 0); 
-// draw line number bg
-draw_set_color(color[13]);
-draw_rectangle(x, y + menuh, x + linew - 1, y + h - 1, 0); 
-draw_set_color(color[12]);
-draw_rectangle(x, y + menuh, x + linew - 1, y + h - 1, 1); 
 
 //text;
 draw_set_halign(fa_left);
@@ -203,15 +352,6 @@ for(var yy = 0; yy &lt; text_l; yy++)
         
     }
     
-    var xx = string_length(text[yy]);
-    {
-        //coll = ord(string_char_at(col[yy], xx + 1)) - 97;
-    }
-    
-    // line number
-    draw_set_halign(fa_right);
-    draw_text_color(xxx + linew - 3, yyy + ty, yy + 1, color[12 + 3 * (cury == yy)], color[12 + 3 * (cury == yy)], color[12 + 3 * (cury == yy)], color[12 + 3 * (cury == yy)], 1);
-    draw_set_halign(fa_left);
     tx = 0;
     ty += lineh;
 }
@@ -222,7 +362,73 @@ if !string_length(kor_buffer) &amp;&amp; !((current_time - time) div 500 % 2)
     draw_set_color(color[0]);
     draw_line_width(xx - 1, yyy + lineh * cury, xx - 1, yyy + lineh * (cury + 1), 2);
 }
+
+// line number
+// draw  bg
+draw_set_color(color[13]);
+draw_rectangle(x, y + menuh, x + linew - 1, y + h - 1, 0); 
+draw_set_color(color[12]);
+draw_rectangle(x, y + menuh, x + linew - 1, y + h - 1, 1); 
+
+draw_set_halign(fa_right);
+var ty = 0;
+for(var yy = 0; yy &lt; text_l; yy++)
+{
+    draw_set_colour(color[12 + 3 * (cury == yy)]);
+    draw_text(x + linew - 6, yyy + ty, yy + 1);
+    ty += lineh;
+    
+}
+
+// menu bar
+draw_set_color(3815994);
+draw_rectangle(x, y, x + w - 1, y + menuh - 1, 0); // draw bg
+draw_set_color(color[0]);
+draw_rectangle(x, y, x + w - 1, y + menuh - 1, 1); // draw bg
+
+
+
 //scroll bar
+if (sx - a_sx) &gt; 0
+{
+    a_sx += ceil((sx - a_sx) / 3);
+}
+if (sy - a_sy) &gt; 0
+{
+    a_sy += ceil((sy - a_sy) / 3);
+}
+if ((sx - a_sx) &lt; 0)
+{
+    a_sx += floor((sx - a_sx) / 3);
+}
+if ((sy - a_sy) &lt; 0)
+{
+    a_sy += floor((sy - a_sy) / 3);
+}
+maxsx = 0;
+for(var i = 0; i &lt; text_l; i++)
+if string_width(text[maxsx]) &lt; string_width(text[i])
+    maxsx = i;
+maxsx = max(string_width(text[maxsx]) - (w - scrw - linew), 0);
+maxsy = max(0, (text_l * lineh - (h - menuh - errh - infh - scrw)));
+bar_x = (w - scrw * 2) * (w - scrw - linew) / (maxsx + w - scrw - linew);
+bar_y = (h - menuh - errh - infh - scrw * 3) * (h - menuh - errh - infh - scrw) / (maxsy + h - menuh - errh - infh - scrw);
+//horizontal
+draw_set_color(5460819);
+draw_rectangle(x, y + h - errh - infh - scrw, x + w - 1, y + h - errh - infh - 1, 0); // bg
+ccc[0] = 2368548;
+ccc[1] = 1381653;
+draw_set_color(ccc[(sClicked == 1)]);
+draw_rectangle(x + scrw + (w - scrw * 2 - bar_x) * a_sx / maxsx, y + h - errh - infh - scrw + 1, 
+                x + scrw + (w - scrw * 2 - bar_x) * a_sx / maxsx + bar_x - 1, y + h - errh - infh - 2, 0); // bar
+//vertical
+draw_set_color(5460819);
+draw_rectangle(x + w - scrw, y + menuh, x + w - 1, y + h - errh - infh - scrw - 1, 0); // bg
+draw_set_color(ccc[(sClicked == 2)]);
+draw_rectangle(x + w - scrw + 1, y + menuh + scrw + (h - menuh - errh - infh - scrw * 3 - bar_y) * a_sy / maxsy, 
+                x + w - 2, menuh + scrw + (h - menuh - errh - infh - scrw * 3 - bar_y) * a_sy / maxsy + bar_y - 1, 0); // bar
+
+
 
 //information bar
 draw_set_font(fontNanumGothicCoding);
@@ -255,6 +461,88 @@ for(var i = 0; i &lt; 17; i++)
     draw_line_colour(10, 100 + i * 20, 100, 100 + i * 20, color[i], color[i]);
 }
 */
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="9" enumb="83">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>if keyboard_check(vk_control)
+{
+    kor_insert(text_eng_to_hangul(kor_buffer));
+    kor_buffer = "";
+    var filename = get_save_filename("script gml file (*.gml)|*.gml|any file (*.*)|*.*", "untitled.gml");
+    if filename != ""
+    {
+        var file = file_text_open_write(filename);
+        for(var i = 0; i &lt; text_l; i++)
+        {
+            text[text_l] = file_text_write_string(file, text[i]);
+            file_text_writeln(file);
+        }
+        file_text_close(file);
+        textcolor_gen();
+    }
+}
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="9" enumb="79">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>if keyboard_check(vk_control)
+{
+    var filename = get_open_filename("script gml file (*.gml)|*.gml|any file (*.*)|*.*", "");
+    if filename != ""
+    {
+        text_l = 0;
+        var file = file_text_open_read(filename);
+        while(!file_text_eof(file))
+        {
+            text[text_l] = file_text_read_string(file);
+            file_text_readln(file);
+            text_l++;
+        }
+        file_text_close(file);
+        curx = 0;
+        cury = 0;
+        textcolor_gen();
+        kor_buffer = "";
+        kor_string = text[0];
+    }
+}
 </string>
           </argument>
         </arguments>
